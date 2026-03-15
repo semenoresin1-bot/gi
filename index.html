@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FORMA / ФОРМА</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #F5F2ED;
+    --ink: #1A1814;
+    --mid: #9C9488;
+    --accent: #C8B89A;
+    --thin: 300;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: var(--thin);
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* Custom cursor */
+  .cursor {
+    width: 6px; height: 6px;
+    background: var(--ink);
+    border-radius: 50%;
+    position: fixed;
+    top: 0; left: 0;
+    pointer-events: none;
+    z-index: 9999;
+    transition: transform 0.15s ease, opacity 0.2s;
+    transform: translate(-50%, -50%);
+  }
+  .cursor-ring {
+    width: 32px; height: 32px;
+    border: 1px solid var(--ink);
+    border-radius: 50%;
+    position: fixed;
+    top: 0; left: 0;
+    pointer-events: none;
+    z-index: 9998;
+    transform: translate(-50%, -50%);
+    transition: transform 0.4s cubic-bezier(.23,1,.32,1), width 0.3s, height 0.3s, border-color 0.3s;
+    opacity: 0.5;
+  }
+  body:hover .cursor { opacity: 1; }
+
+  /* Lang toggle */
+  .lang-toggle {
+    position: fixed;
+    top: 2rem; right: 2.5rem;
+    z-index: 100;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+  }
+  .lang-btn {
+    background: none;
+    border: none;
+    color: var(--mid);
+    cursor: none;
+    font-family: inherit;
+    font-size: inherit;
+    letter-spacing: inherit;
+    padding: 0.2rem 0;
+    border-bottom: 1px solid transparent;
+    transition: color 0.3s, border-color 0.3s;
+  }
+  .lang-btn.active { color: var(--ink); border-bottom-color: var(--ink); }
+  .lang-btn:hover { color: var(--ink); }
+  .lang-sep { color: var(--accent); }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; z-index: 100;
+    padding: 2rem 2.5rem;
+    display: flex;
+    align-items: center;
+    mix-blend-mode: multiply;
+  }
+  .logo {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: grid;
+    grid-template-rows: 1fr auto;
+    padding: 0 2.5rem 3rem;
+  }
+  .hero-center {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-top: 6rem;
+  }
+  .hero-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.25em;
+    color: var(--mid);
+    margin-bottom: 2rem;
+    opacity: 0;
+    animation: fadeUp 1s 0.3s forwards;
+  }
+  .hero-title {
+    font-size: clamp(4rem, 12vw, 10rem);
+    font-weight: 300;
+    line-height: 0.9;
+    letter-spacing: -0.02em;
+    overflow: hidden;
+  }
+  .hero-title span {
+    display: block;
+    opacity: 0;
+    transform: translateY(60px);
+    animation: slideUp 1.2s cubic-bezier(.23,1,.32,1) forwards;
+  }
+  .hero-title span:nth-child(1) { animation-delay: 0.5s; }
+  .hero-title span:nth-child(2) { animation-delay: 0.65s; font-style: italic; color: var(--mid); }
+
+  .hero-desc {
+    margin-top: 3rem;
+    max-width: 420px;
+    font-size: 1.1rem;
+    line-height: 1.7;
+    color: var(--mid);
+    opacity: 0;
+    animation: fadeUp 1s 1s forwards;
+  }
+  .hero-scroll {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.55rem;
+    letter-spacing: 0.2em;
+    color: var(--mid);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    opacity: 0;
+    animation: fadeUp 1s 1.3s forwards;
+  }
+  .hero-scroll::before {
+    content: '';
+    width: 40px; height: 1px;
+    background: var(--accent);
+  }
+
+  /* DIVIDER */
+  .divider {
+    width: 100%;
+    height: 1px;
+    background: var(--accent);
+    opacity: 0.4;
+    margin: 0 2.5rem;
+    width: calc(100% - 5rem);
+  }
+
+  /* ABOUT */
+  .about {
+    padding: 8rem 2.5rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: start;
+  }
+  .about-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    margin-bottom: 1.5rem;
+  }
+  .about-heading {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 300;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+  .about-heading em { font-style: italic; color: var(--mid); }
+  .about-body {
+    padding-top: 1rem;
+    font-size: 1.05rem;
+    line-height: 1.85;
+    color: var(--mid);
+  }
+  .about-body p + p { margin-top: 1.2rem; }
+
+  /* WORKS */
+  .works {
+    padding: 4rem 2.5rem 8rem;
+  }
+  .works-header {
+    display: flex;
+    align-items: baseline;
+    gap: 2rem;
+    margin-bottom: 4rem;
+  }
+  .works-title {
+    font-size: clamp(1.5rem, 4vw, 2.5rem);
+    font-weight: 300;
+    letter-spacing: -0.02em;
+  }
+  .works-count {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    color: var(--mid);
+  }
+  .works-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5px;
+    background: var(--accent);
+    opacity: 0.6;
+  }
+  .work-item {
+    background: var(--bg);
+    aspect-ratio: 3/4;
+    position: relative;
+    overflow: hidden;
+    cursor: none;
+    opacity: 1;
+  }
+  .work-item:hover .work-overlay { opacity: 1; }
+  .work-item:hover .work-inner { transform: scale(1.02); }
+  .work-inner {
+    width: 100%; height: 100%;
+    display: flex;
+    align-items: flex-end;
+    padding: 1.5rem;
+    transition: transform 0.6s cubic-bezier(.23,1,.32,1);
+    background: linear-gradient(160deg, var(--bg) 0%, color-mix(in srgb, var(--accent) 15%, var(--bg)) 100%);
+  }
+  .work-item:nth-child(2) .work-inner {
+    background: linear-gradient(160deg, color-mix(in srgb, var(--ink) 4%, var(--bg)) 0%, var(--bg) 100%);
+  }
+  .work-item:nth-child(3) .work-inner {
+    background: linear-gradient(200deg, var(--bg) 0%, color-mix(in srgb, var(--accent) 25%, var(--bg)) 100%);
+  }
+  .work-overlay {
+    position: absolute;
+    inset: 0;
+    background: color-mix(in srgb, var(--ink) 5%, transparent);
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+  .work-meta { position: relative; z-index: 2; }
+  .work-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.55rem;
+    letter-spacing: 0.2em;
+    color: var(--mid);
+    display: block;
+    margin-bottom: 0.3rem;
+  }
+  .work-name {
+    font-size: 1rem;
+    font-weight: 300;
+    letter-spacing: 0.03em;
+  }
+  .work-type {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.55rem;
+    color: var(--mid);
+    letter-spacing: 0.1em;
+  }
+
+  /* CONTACT */
+  .contact {
+    border-top: 1px solid;
+    border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+    padding: 6rem 2.5rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: end;
+  }
+  .contact-heading {
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    font-weight: 300;
+    line-height: 1;
+    letter-spacing: -0.03em;
+  }
+  .contact-heading em { font-style: italic; color: var(--mid); }
+  .contact-links {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .contact-link {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    color: var(--mid);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: color 0.3s;
+    cursor: none;
+  }
+  .contact-link::before {
+    content: '';
+    width: 24px; height: 1px;
+    background: currentColor;
+    transition: width 0.3s;
+  }
+  .contact-link:hover { color: var(--ink); }
+  .contact-link:hover::before { width: 40px; }
+
+  /* FOOTER */
+  footer {
+    padding: 2rem 2.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid;
+    border-color: color-mix(in srgb, var(--accent) 30%, transparent);
+  }
+  footer span {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.55rem;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    to { opacity: 1; transform: translateY(0); }
+    from { opacity: 0; transform: translateY(16px); }
+  }
+  @keyframes slideUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* LANG */
+  [data-en], [data-ru] { transition: opacity 0.3s; }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    .about, .contact { grid-template-columns: 1fr; gap: 2rem; }
+    .works-grid { grid-template-columns: 1fr 1fr; }
+    .hero-title { font-size: clamp(3rem, 16vw, 6rem); }
+  }
+  @media (max-width: 480px) {
+    .works-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<div class="lang-toggle">
+  <button class="lang-btn active" id="btnEn" onclick="setLang('en')">EN</button>
+  <span class="lang-sep">/</span>
+  <button class="lang-btn" id="btnRu" onclick="setLang('ru')">РУ</button>
+</div>
+
+<nav>
+  <a href="#" class="logo">FORMA ✦ ФОРМА</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-center">
+    <p class="hero-label" data-en="CREATIVE STUDIO · EST. 2024" data-ru="ТВОРЧЕСКАЯ СТУДИЯ · 2024">CREATIVE STUDIO · EST. 2024</p>
+    <h1 class="hero-title">
+      <span data-en="WHERE" data-ru="ТАМ,">WHERE</span>
+      <span data-en="form meets idea" data-ru="форма встречает идею">form meets idea</span>
+    </h1>
+    <p class="hero-desc" data-en="An independent creative studio working at the intersection of visual art, design, and concept. Every project is a dialogue between space, material, and meaning." data-ru="Независимая творческая студия на пересечении визуального искусства, дизайна и концепта. Каждый проект — диалог между пространством, материалом и смыслом.">An independent creative studio working at the intersection of visual art, design, and concept. Every project is a dialogue between space, material, and meaning.</p>
+  </div>
+  <div class="hero-scroll" data-en="SCROLL TO EXPLORE" data-ru="ПРОКРУТИТЕ ВНИЗ">SCROLL TO EXPLORE</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ABOUT -->
+<section class="about">
+  <div>
+    <p class="about-num">01</p>
+    <h2 class="about-heading">
+      <span data-en="About the" data-ru="О">About the</span><br>
+      <em data-en="project" data-ru="проекте">project</em>
+    </h2>
+  </div>
+  <div class="about-body">
+    <p data-en="FORMA is a space where creative experiments become tangible works. We work with image, typography, and architecture of thought — transforming ideas into precise visual forms." data-ru="FORMA — это пространство, где творческие эксперименты становятся осязаемыми работами. Мы работаем с образом, типографикой и архитектурой мысли — превращая идеи в точные визуальные формы.">FORMA is a space where creative experiments become tangible works. We work with image, typography, and architecture of thought — transforming ideas into precise visual forms.</p>
+    <p data-en="The studio is guided by a simple principle: restraint amplifies expression. Less noise — more resonance." data-ru="Студию ведёт простой принцип: сдержанность усиливает выразительность. Меньше шума — больше резонанса.">The studio is guided by a simple principle: restraint amplifies expression. Less noise — more resonance.</p>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- WORKS -->
+<section class="works">
+  <div class="works-header">
+    <h2 class="works-title" data-en="Selected works" data-ru="Избранные работы">Selected works</h2>
+    <span class="works-count">— 003</span>
+  </div>
+  <div class="works-grid">
+    <div class="work-item">
+      <div class="work-inner">
+        <div class="work-meta">
+          <span class="work-num">001</span>
+          <p class="work-name" data-en="Negative Space" data-ru="Негативное пространство">Negative Space</p>
+          <p class="work-type" data-en="VISUAL IDENTITY" data-ru="ВИЗУАЛЬНАЯ ИДЕНТИКА">VISUAL IDENTITY</p>
+        </div>
+      </div>
+      <div class="work-overlay"></div>
+    </div>
+    <div class="work-item">
+      <div class="work-inner">
+        <div class="work-meta">
+          <span class="work-num">002</span>
+          <p class="work-name" data-en="Quiet Hours" data-ru="Тихие часы">Quiet Hours</p>
+          <p class="work-type" data-en="EDITORIAL DESIGN" data-ru="РЕДАКЦИОННЫЙ ДИЗАЙН">EDITORIAL DESIGN</p>
+        </div>
+      </div>
+      <div class="work-overlay"></div>
+    </div>
+    <div class="work-item">
+      <div class="work-inner">
+        <div class="work-meta">
+          <span class="work-num">003</span>
+          <p class="work-name" data-en="Trace" data-ru="След">Trace</p>
+          <p class="work-type" data-en="INSTALLATION" data-ru="ИНСТАЛЛЯЦИЯ">INSTALLATION</p>
+        </div>
+      </div>
+      <div class="work-overlay"></div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="contact">
+  <div>
+    <h2 class="contact-heading">
+      <span data-en="Let's" data-ru="Давайте">Let's</span><br>
+      <em data-en="connect" data-ru="создавать">connect</em>
+    </h2>
+  </div>
+  <div class="contact-links">
+    <a href="mailto:hello@forma.studio" class="contact-link">HELLO@FORMA.STUDIO</a>
+    <a href="#" class="contact-link">INSTAGRAM</a>
+    <a href="#" class="contact-link">BEHANCE</a>
+    <a href="#" class="contact-link" data-en="TELEGRAM" data-ru="TELEGRAM">TELEGRAM</a>
+  </div>
+</section>
+
+<footer>
+  <span data-en="© 2024 FORMA STUDIO" data-ru="© 2024 ФОРМА СТУДИЯ">© 2024 FORMA STUDIO</span>
+  <span data-en="ALL RIGHTS RESERVED" data-ru="ВСЕ ПРАВА ЗАЩИЩЕНЫ">ALL RIGHTS RESERVED</span>
+</footer>
+
+<script>
+  // Cursor
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+  document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; cursor.style.left = mx + 'px'; cursor.style.top = my + 'px'; });
+  function animRing() { rx += (mx - rx) * 0.12; ry += (my - ry) * 0.12; ring.style.left = rx + 'px'; ring.style.top = ry + 'px'; requestAnimationFrame(animRing); }
+  animRing();
+
+  document.querySelectorAll('a, button, .work-item').forEach(el => {
+    el.addEventListener('mouseenter', () => { ring.style.width = '52px'; ring.style.height = '52px'; ring.style.borderColor = 'var(--ink)'; ring.style.opacity = '0.3'; });
+    el.addEventListener('mouseleave', () => { ring.style.width = '32px'; ring.style.height = '32px'; ring.style.borderColor = 'var(--ink)'; ring.style.opacity = '0.5'; });
+  });
+
+  // Lang toggle
+  let currentLang = 'en';
+  function setLang(lang) {
+    currentLang = lang;
+    document.getElementById('btnEn').classList.toggle('active', lang === 'en');
+    document.getElementById('btnRu').classList.toggle('active', lang === 'ru');
+    document.querySelectorAll('[data-en][data-ru]').forEach(el => {
+      el.style.opacity = '0';
+      setTimeout(() => {
+        el.textContent = el.dataset[lang];
+        el.style.opacity = '1';
+      }, 180);
+    });
+  }
+
+  // Scroll reveal
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.style.opacity = '1'; e.target.style.transform = 'translateY(0)'; } });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.about, .works, .contact, .work-item').forEach(el => {
+    el.style.opacity = '0'; el.style.transform = 'translateY(30px)'; el.style.transition = 'opacity 0.9s cubic-bezier(.23,1,.32,1), transform 0.9s cubic-bezier(.23,1,.32,1)';
+    observer.observe(el);
+  });
+</script>
+</body>
+</html>
